@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - '**.zip'  # Se dispara automáticamente SOLO cuando subes o actualizas un archivo ZIP
+      - '**.zip'
   workflow_dispatch:
 
 jobs:
@@ -21,12 +21,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 3. Configurar Gradle 8.4
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.4'
-
-      - name: 4. Descomprimir y combinar el archivo ZIP
+      - name: 3. Descomprimir y combinar el archivo ZIP
         run: |
           echo "Buscando archivos .zip en el repositorio..."
           for file in *.zip; do
@@ -42,16 +37,16 @@ jobs:
             gradle wrapper
           fi
 
-      - name: 5. Aceptar licencias de Android y compilar APK
+      - name: 4. Aceptar licencias de Android y compilar APK
         run: |
           export ANDROID_HOME=$ANDROID_SDK_ROOT
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
           
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
-      - name: 6. Guardar la APK generada
+      - name: 5. Guardar la APK generada
         uses: actions/upload-artifact@v4
         with:
           name: app-multimodal-debug
